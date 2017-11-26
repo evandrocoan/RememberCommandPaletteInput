@@ -17,7 +17,6 @@
     {
         "keys": ["shift+escape"], "command": "single_selection_last", "context":
         [
-            { "key": "panel_visible", "operator": "equal", "operand": true },
             { "key": "num_selections", "operator": "not_equal", "operand": 1 },
         ]
     },
