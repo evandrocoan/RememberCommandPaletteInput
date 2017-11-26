@@ -1,5 +1,5 @@
 [
-    { 
+    {
         "keys": ["escape"], "command": "hide_panel", "args": {"cancel": true },
         "context":
         [
@@ -9,6 +9,13 @@
     },
     {
         "keys": ["escape"], "command": "single_selection_first", "context":
+        [
+            { "key": "panel_visible", "operator": "equal", "operand": true },
+            { "key": "num_selections", "operator": "not_equal", "operand": 1 },
+        ]
+    },
+    {
+        "keys": ["shift+escape"], "command": "single_selection_last", "context":
         [
             { "key": "panel_visible", "operator": "equal", "operand": true },
             { "key": "num_selections", "operator": "not_equal", "operand": 1 },
