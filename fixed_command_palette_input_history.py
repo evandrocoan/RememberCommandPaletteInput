@@ -47,6 +47,12 @@ class FixedCommandPaletteLastInputHistoryCommand(sublime_plugin.WindowCommand):
 class FixedCommandPaletteLastInputHistoryEventListener(sublime_plugin.EventListener):
 
     def on_activated( self, view ):
+        """
+            Allow to open the command palette correctly after running a command by pressing enter.
+
+            How to detect when the user closed the `goto_definition` box?
+            https://forum.sublimetext.com/t/how-to-detect-when-the-user-closed-the-goto-definition-box/25800
+        """
         # print( "FixedCommandPaletteLastInputHistoryEventListener, on_activated, Setting is_command_palette_open to False..." )
 
         global is_command_palette_open
