@@ -1,23 +1,33 @@
 [
-    {
-        "keys": ["escape"], "command": "hide_panel", "args": {"cancel": true },
-        "context":
+    { "keys": ["escape"], "command": "hide_panel", "args": {"cancel": true }, "context":
         [
             { "key": "num_selections", "operator": "equal", "operand": 1 },
             { "key": "panel_visible", "operator": "equal", "operand": true },
+            { "key": "fixed_command_palette_last_input_history_context", "operator": "equal", "operand": "other" },
         ]
     },
-    {
-        "keys": ["escape"], "command": "single_selection_first", "context":
+    { "keys": ["escape"], "command": "single_selection_first", "context":
         [
             { "key": "panel_visible", "operator": "equal", "operand": true },
             { "key": "num_selections", "operator": "not_equal", "operand": 1 },
+            { "key": "fixed_command_palette_last_input_history_context", "operator": "equal", "operand": "other" },
         ]
     },
-    {
-        "keys": ["shift+escape"], "command": "single_selection_last", "context":
+    { "keys": ["shift+escape"], "command": "single_selection_last", "context":
         [
             { "key": "num_selections", "operator": "not_equal", "operand": 1 },
+        ]
+    },
+
+    // Close/Open the command palette
+    { "keys": ["escape"], "command": "fixed_hide_overlay_which_is_correctly_logged", "context":
+        [
+            { "key": "fixed_command_palette_last_input_history_context", "operator": "equal", "operand": "close" },
+        ]
+    },
+    { "keys": ["ctrl+shift+p"], "command": "fixed_command_palette_last_input_history", "context":
+        [
+            { "key": "fixed_command_palette_last_input_history_context", "operator": "equal", "operand": "open" }
         ]
     },
 ]
