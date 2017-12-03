@@ -36,9 +36,7 @@ class FixedCommandPaletteLastInputHistoryHelperCommand(sublime_plugin.TextComman
         global widget_text
         current_widget_text = self.view.substr( selections[0] )
 
-        if len( current_widget_text ) \
-                and current_widget_text != "\n":
-
+        if len( current_widget_text ):
             widget_text = current_widget_text
             self.view.erase( edit, selections[0] )
 
