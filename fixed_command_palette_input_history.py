@@ -2,7 +2,7 @@
 import sublime
 import sublime_plugin
 
-clipboard_text = ""
+widget_text = ""
 
 command_palette_states  = ("open", "close")
 is_command_palette_open = False
@@ -20,28 +20,32 @@ class FixedCommandPaletteLastInputHistoryCommand(sublime_plugin.WindowCommand):
         else:
             # print( "\nFixedCommandPaletteLastInputHistoryCommand, Opening fixed command palette..." )
             self.window.run_command( "show_overlay", {"overlay": "command_palette"} )
-
             self.window.run_command( "select_all" )
-            self.window.run_command( "copy" )
 
-            global clipboard_text
-            current_clipboard_text = sublime.get_clipboard()
-
-            # print( "FixedCommandPaletteLastInputHistoryCommand, clipboard_text:         %r" % ( str( clipboard_text ) ) )
-            # print( "FixedCommandPaletteLastInputHistoryCommand, current_clipboard_text: %r" % ( str( current_clipboard_text ) ) )
-
-            if len( current_clipboard_text ) \
-                    and current_clipboard_text != "\n":
-
-                clipboard_text = current_clipboard_text
-
-            else:
-                sublime.set_clipboard( clipboard_text )
-
-            self.window.run_command( "paste" )
+            self.window.run_command( "fixed_command_palette_last_input_history_helper" )
             self.window.run_command( "select_all" )
 
             is_command_palette_open = True
+
+
+class FixedCommandPaletteLastInputHistoryHelperCommand(sublime_plugin.TextCommand):
+
+    def run(self, edit):
+        selections = self.view.sel()
+
+        global widget_text
+        current_widget_text = self.view.substr( selections[0] )
+
+        if len( current_widget_text ) \
+                and current_widget_text != "\n":
+
+            widget_text = current_widget_text
+            self.view.erase( edit, selections[0] )
+
+        # print( "FixedCommandPaletteLastInputHistoryCommand, widget_text:         %r" % ( str( widget_text ) ) )
+        # print( "FixedCommandPaletteLastInputHistoryCommand, current_widget_text: %r" % ( str( current_widget_text ) ) )
+
+        self.view.run_command( "append", {"characters": widget_text} )
 
 
 class FixedCommandPaletteLastInputHistoryEventListener(sublime_plugin.EventListener):
