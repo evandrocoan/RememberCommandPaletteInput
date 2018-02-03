@@ -8,7 +8,6 @@
     },
     { "keys": ["ctrl+shift+p"], "command": "fixed_command_palette_last_input_history", "context":
         [
-            { "key": "auto_complete_visible", "operator": "equal", "operand": false },
             { "key": "fixed_command_palette_last_input_history_context", "operator": "equal", "operand": "open" },
         ]
     },
