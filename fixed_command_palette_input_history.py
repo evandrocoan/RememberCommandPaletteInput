@@ -110,8 +110,8 @@ class FixedCommandPaletteLastInputHistoryHelperCommand(sublime_plugin.TextComman
             save_settings( current_widget_text )
             self.view.erase( edit, selections[0] )
 
-        # log( 2, "widget_text:         %r" % ( get_input() ) )
-        # log( 2, "current_widget_text: %r" % ( current_widget_text ) )
+        # log( 2, "widget_text:         %r", get_input() )
+        # log( 2, "current_widget_text: %r", current_widget_text )
 
         self.view.run_command( "append", {"characters": get_input()} )
 
@@ -133,7 +133,7 @@ class FixedCommandPaletteLastInputHistoryEventListener(sublime_plugin.EventListe
     def on_query_context(self, view, key, operator, operand, match_all):
 
         if key == "fixed_command_palette_last_input_history_context":
-            # log( 2, "operand: %5s, is_command_palette_open: %s" % ( operand, is_command_palette_open ) )
+            # log( 2, "operand: %5s, is_command_palette_open: %s", operand, is_command_palette_open )
 
             if operand in command_palette_states:
 
@@ -152,7 +152,7 @@ class FixedCommandPaletteLastInputHistoryEventListener(sublime_plugin.EventListe
         self.set_command_palette_state(window, command_name, args)
 
     def set_command_palette_state(self, window, command_name, args):
-        # log( 2, "command_name: " + command_name )
+        # log( 2, "command_name: %s", command_name )
 
         if command_name == "fixed_hide_overlay_which_is_correctly_logged":
             # log( 2, "Setting is_command_palette_open to False..." )
