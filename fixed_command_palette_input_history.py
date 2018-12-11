@@ -67,7 +67,10 @@ def save_settings(widget_text):
         while len( workspaces ) > 100:
             pop_last_item( workspaces )
 
+        # https://docs.python.org/3/library/collections.html#collections.OrderedDict.move_to_end
+        # https://stackoverflow.com/questions/16664874/how-can-i-add-an-element-at-the-top-of-an-ordereddict-in-python
         workspaces[project_file_name] = widget_text
+        workspaces.move_to_end( project_file_name, last=False )
 
     write_data_file( g_package_settings_path, g_settings, debug=0 )
 
