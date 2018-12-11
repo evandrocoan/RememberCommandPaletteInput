@@ -2,10 +2,82 @@
 import sublime
 import sublime_plugin
 
-widget_text = ""
+import os
+
+from collections import deque
+from channel_manager.channel_utilities import load_data_file
+from channel_manager.channel_utilities import write_data_file
+
+from debug_tools import getLogger
+log = getLogger( 1, __name__ )
+
+# After some python version, the popitem() behavior changed, then, automatically detect which one we
+# have here: https://docs.python.org/3/library/collections.html#collections.OrderedDict.popitem
+def pop_last_item(dictionary):
+    dictionary.popitem(False)
+
+try:
+    {1: 'a'}.popitem(False)
+
+except TypeError:
+
+    def pop_last_item(dictionary):
+        dictionary.popitem()
+
+CURRENT_PACKAGE_FILE   = os.path.dirname( os.path.realpath( __file__ ) )
+PACKAGE_ROOT_DIRECTORY = CURRENT_PACKAGE_FILE.replace( ".sublime-package", "" )
+CURRENT_PACKAGE_NAME   = os.path.basename( PACKAGE_ROOT_DIRECTORY )
+
+g_settings = \
+{
+    "last_input": "",
+    "workspaces": {}
+}
 
 command_palette_states  = ("open", "close")
 is_command_palette_open = False
+
+
+def plugin_loaded():
+    load_settings()
+
+
+def load_settings():
+    global g_settings
+    global g_package_settings_path
+
+    g_package_settings_path = os.path.join( sublime.packages_path(), "User", CURRENT_PACKAGE_NAME + ".inputs" )
+
+    try:
+        # Returns an OrderedDict
+        g_settings = load_data_file( g_package_settings_path, exceptions=True )
+
+    except:
+        log.exception( "Could not load the settings file" )
+        write_data_file( g_package_settings_path, g_settings, debug=0 )
+
+
+def save_settings(widget_text):
+    g_settings['last_input'] = widget_text
+    project_file_name = sublime.active_window().project_file_name()
+
+    if project_file_name:
+        workspaces = g_settings.get( 'workspaces', {} )
+
+        while len( workspaces ) > 100:
+            pop_last_item( workspaces )
+
+        workspaces[project_file_name] = widget_text
+
+    write_data_file( g_package_settings_path, g_settings, debug=0 )
+
+
+def get_input():
+    project_file_name = sublime.active_window().project_file_name()
+    workspaces = g_settings.get( 'workspaces', {} )
+    widget_text = workspaces.get( project_file_name, g_settings.get( 'last_input', "" ) )
+    return widget_text
+
 
 class FixedCommandPaletteLastInputHistoryCommand(sublime_plugin.WindowCommand):
 
@@ -14,11 +86,11 @@ class FixedCommandPaletteLastInputHistoryCommand(sublime_plugin.WindowCommand):
         global is_command_palette_just_closed
 
         if is_command_palette_open:
-            # print( "FixedCommandPaletteLastInputHistoryCommand, Command palette is already open, closing it..." )
+            # log( 2, "Command palette is already open, closing it..." )
             self.window.run_command( "fixed_hide_overlay_which_is_correctly_logged" )
 
         else:
-            # print( "\nFixedCommandPaletteLastInputHistoryCommand, Opening fixed command palette..." )
+            # log( 2, "Opening fixed command palette..." )
             self.window.run_command( "show_overlay", {"overlay": "command_palette"} )
             self.window.run_command( "select_all" )
 
@@ -32,18 +104,16 @@ class FixedCommandPaletteLastInputHistoryHelperCommand(sublime_plugin.TextComman
 
     def run(self, edit):
         selections = self.view.sel()
-
-        global widget_text
         current_widget_text = self.view.substr( selections[0] )
 
         if len( current_widget_text ):
-            widget_text = current_widget_text
+            save_settings( current_widget_text )
             self.view.erase( edit, selections[0] )
 
-        # print( "FixedCommandPaletteLastInputHistoryCommand, widget_text:         %r" % ( str( widget_text ) ) )
-        # print( "FixedCommandPaletteLastInputHistoryCommand, current_widget_text: %r" % ( str( current_widget_text ) ) )
+        # log( 2, "widget_text:         %r" % ( get_input() ) )
+        # log( 2, "current_widget_text: %r" % ( current_widget_text ) )
 
-        self.view.run_command( "append", {"characters": widget_text} )
+        self.view.run_command( "append", {"characters": get_input()} )
 
 
 class FixedCommandPaletteLastInputHistoryEventListener(sublime_plugin.EventListener):
@@ -55,7 +125,7 @@ class FixedCommandPaletteLastInputHistoryEventListener(sublime_plugin.EventListe
             How to detect when the user closed the `goto_definition` box?
             https://forum.sublimetext.com/t/how-to-detect-when-the-user-closed-the-goto-definition-box/25800
         """
-        # print( "FixedCommandPaletteLastInputHistoryEventListener, on_activated, Setting is_command_palette_open to False..." )
+        # log( 2, "on_activated, Setting is_command_palette_open to False..." )
 
         global is_command_palette_open
         is_command_palette_open = False
@@ -63,7 +133,7 @@ class FixedCommandPaletteLastInputHistoryEventListener(sublime_plugin.EventListe
     def on_query_context(self, view, key, operator, operand, match_all):
 
         if key == "fixed_command_palette_last_input_history_context":
-            # print( "FixedCommandPaletteLastInputHistoryEventListener, operand: %5s, is_command_palette_open: %s" % ( operand, str( is_command_palette_open ) ) )
+            # log( 2, "operand: %5s, is_command_palette_open: %s" % ( operand, is_command_palette_open ) )
 
             if operand in command_palette_states:
 
@@ -82,10 +152,10 @@ class FixedCommandPaletteLastInputHistoryEventListener(sublime_plugin.EventListe
         self.set_command_palette_state(window, command_name, args)
 
     def set_command_palette_state(self, window, command_name, args):
-        # print( "command_name: " + command_name )
+        # log( 2, "command_name: " + command_name )
 
         if command_name == "fixed_hide_overlay_which_is_correctly_logged":
-            # print( "FixedCommandPaletteLastInputHistoryEventListener, set_command_palette_state, Setting is_command_palette_open to False..." )
+            # log( 2, "Setting is_command_palette_open to False..." )
 
             global is_command_palette_open
             is_command_palette_open = False
