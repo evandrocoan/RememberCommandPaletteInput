@@ -11,13 +11,15 @@ from channel_manager.channel_utilities import write_data_file
 from debug_tools import getLogger
 log = getLogger( 1, __name__ )
 
-# After some python version, the popitem() behavior changed, then, automatically detect which one we
-# have here: https://docs.python.org/3/library/collections.html#collections.OrderedDict.popitem
+# Until python 3.5 the popitem() has has a bug where it does not accepts the last=False argument
+# https://bugs.python.org/issue24394 TypeError: popitem() takes no keyword arguments, then,
+# automatically detect which one we have here:
+# https://docs.python.org/3/library/collections.html#collections.OrderedDict.popitem
 def pop_last_item(dictionary):
-    dictionary.popitem(False)
+    dictionary.popitem(last=True)
 
 try:
-    {1: 'a'}.popitem(False)
+    {1: 'a'}.popitem(last=True)
 
 except TypeError:
 
@@ -33,6 +35,8 @@ g_settings = \
     "last_input": "",
     "workspaces": {}
 }
+
+MAXIMUM_WORSPACES_ENTRIES = 100
 
 command_palette_states  = ("open", "close")
 is_command_palette_open = False
@@ -64,13 +68,13 @@ def save_settings(widget_text):
     if project_file_name:
         workspaces = g_settings.get( 'workspaces', {} )
 
-        while len( workspaces ) > 100:
-            pop_last_item( workspaces )
-
         # https://docs.python.org/3/library/collections.html#collections.OrderedDict.move_to_end
         # https://stackoverflow.com/questions/16664874/how-can-i-add-an-element-at-the-top-of-an-ordereddict-in-python
         workspaces[project_file_name] = widget_text
         workspaces.move_to_end( project_file_name, last=False )
+
+        while len( workspaces ) > MAXIMUM_WORSPACES_ENTRIES:
+            pop_last_item( workspaces )
 
     write_data_file( g_package_settings_path, g_settings, debug=0 )
 
