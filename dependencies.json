@@ -1,8 +1,8 @@
 {
     "*": {
         "*": [
-            "channelmanager",
-            "debugtools"
+            "debugtools",
+            "channelmanager"
         ]
     }
 }
