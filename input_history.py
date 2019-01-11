@@ -9,22 +9,8 @@ from channel_manager.channel_utilities import load_data_file
 from channel_manager.channel_utilities import write_data_file
 
 from debug_tools import getLogger
+from debug_tools.utilities import pop_dict_last_item
 log = getLogger( 1, __name__ )
-
-# Until python 3.5 the popitem() has has a bug where it does not accepts the last=False argument
-# https://bugs.python.org/issue24394 TypeError: popitem() takes no keyword arguments, then,
-# automatically detect which one we have here:
-# https://docs.python.org/3/library/collections.html#collections.OrderedDict.popitem
-def pop_last_item(dictionary):
-    dictionary.popitem(last=True)
-
-try:
-    {1: 'a'}.popitem(last=True)
-
-except TypeError:
-
-    def pop_last_item(dictionary):
-        dictionary.popitem()
 
 CURRENT_PACKAGE_FILE   = os.path.dirname( os.path.realpath( __file__ ) )
 PACKAGE_ROOT_DIRECTORY = CURRENT_PACKAGE_FILE.replace( ".sublime-package", "" )
@@ -74,7 +60,7 @@ def save_settings(widget_text):
         workspaces.move_to_end( project_file_name, last=False )
 
         while len( workspaces ) > MAXIMUM_WORSPACES_ENTRIES:
-            pop_last_item( workspaces )
+            pop_dict_last_item( workspaces )
 
     write_data_file( g_package_settings_path, g_settings, debug=0 )
 
