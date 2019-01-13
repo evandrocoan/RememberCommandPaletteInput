@@ -4,12 +4,11 @@ import sublime_plugin
 
 import os
 
-from collections import deque
-from channel_manager.channel_utilities import load_data_file
-from channel_manager.channel_utilities import write_data_file
-
 from debug_tools import getLogger
 from debug_tools.utilities import pop_dict_last_item
+from debug_tools.third_part import load_data_file
+from debug_tools.third_part import write_data_file
+
 log = getLogger( 1, __name__ )
 
 CURRENT_PACKAGE_FILE   = os.path.dirname( os.path.realpath( __file__ ) )
