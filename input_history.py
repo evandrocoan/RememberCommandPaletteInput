@@ -48,7 +48,11 @@ def load_settings():
 
 def save_settings(widget_text):
     g_settings['last_input'] = widget_text
-    project_file_name = sublime.active_window().project_file_name()
+    window = sublime.active_window()
+    project_file_name = window.project_file_name()
+
+    window_settings = window.settings()
+    window_settings.set('last_command_palette_input', widget_text)
 
     if project_file_name:
         workspaces = g_settings.get( 'workspaces', {} )
@@ -65,9 +69,16 @@ def save_settings(widget_text):
 
 
 def get_input():
-    project_file_name = sublime.active_window().project_file_name()
+    window = sublime.active_window()
+    window_settings = window.settings()
+
+    project_file_name = window.project_file_name()
     workspaces = g_settings.get( 'workspaces', {} )
-    widget_text = workspaces.get( project_file_name, g_settings.get( 'last_input', "" ) )
+
+    widget_text = window_settings.get( 'last_command_palette_input',
+            workspaces.get( project_file_name,
+                g_settings.get( 'last_input', "" ) ) )
+
     return widget_text
 
 
