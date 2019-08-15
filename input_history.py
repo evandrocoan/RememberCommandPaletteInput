@@ -89,16 +89,13 @@ class FixedCommandPaletteLastInputHistoryCommand(sublime_plugin.WindowCommand):
         global is_command_palette_just_closed
 
         if is_command_palette_open:
-            # log( 2, "Command palette is already open, closing it..." )
+            # log( 1, "Command palette is already open, closing it..." )
             self.window.run_command( "fixed_hide_overlay_which_is_correctly_logged" )
 
         else:
-            # log( 2, "Opening fixed command palette..." )
+            # log( 1, "Opening fixed command palette..." )
             self.window.run_command( "show_overlay", {"overlay": "command_palette"} )
-            self.window.run_command( "select_all" )
-
             self.window.run_command( "fixed_command_palette_last_input_history_helper" )
-            self.window.run_command( "select_all" )
 
             is_command_palette_open = True
 
@@ -106,17 +103,19 @@ class FixedCommandPaletteLastInputHistoryCommand(sublime_plugin.WindowCommand):
 class FixedCommandPaletteLastInputHistoryHelperCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
-        selections = self.view.sel()
-        current_widget_text = self.view.substr( selections[0] )
+        view = self.view
+        selections = view.sel()
+        selections.add( view.line( 0 ) )
+        current_widget_text = view.substr( selections[0] )
 
         if len( current_widget_text ):
             save_settings( current_widget_text )
-            self.view.erase( edit, selections[0] )
+            view.erase( edit, selections[0] )
 
-        # log( 2, "widget_text:         %r", get_input() )
-        # log( 2, "current_widget_text: %r", current_widget_text )
-
-        self.view.run_command( "append", {"characters": get_input()} )
+        # log( 1, "widget_text:         %r", get_input() )
+        # log( 1, "current_widget_text: %r", current_widget_text )
+        view.run_command( "append", {"characters": get_input()} )
+        sublime.set_timeout( lambda: selections.add( view.line( 0 ) ) )
 
 
 class FixedCommandPaletteLastInputHistoryEventListener(sublime_plugin.EventListener):
@@ -128,7 +127,7 @@ class FixedCommandPaletteLastInputHistoryEventListener(sublime_plugin.EventListe
             How to detect when the user closed the `goto_definition` box?
             https://forum.sublimetext.com/t/how-to-detect-when-the-user-closed-the-goto-definition-box/25800
         """
-        # log( 2, "on_activated, Setting is_command_palette_open to False..." )
+        # log( 1, "on_activated, Setting is_command_palette_open to False..." )
 
         global is_command_palette_open
         is_command_palette_open = False
@@ -136,7 +135,7 @@ class FixedCommandPaletteLastInputHistoryEventListener(sublime_plugin.EventListe
     def on_query_context(self, view, key, operator, operand, match_all):
 
         if key == "fixed_command_palette_last_input_history_context":
-            # log( 2, "operand: %5s, is_command_palette_open: %s", operand, is_command_palette_open )
+            # log( 1, "operand: %5s, is_command_palette_open: %s", operand, is_command_palette_open )
 
             if operand in command_palette_states:
 
@@ -155,10 +154,10 @@ class FixedCommandPaletteLastInputHistoryEventListener(sublime_plugin.EventListe
         self.set_command_palette_state(window, command_name, args)
 
     def set_command_palette_state(self, window, command_name, args):
-        # log( 2, "command_name: %s", command_name )
+        # log( 1, "command_name: %s", command_name )
 
         if command_name == "fixed_hide_overlay_which_is_correctly_logged":
-            # log( 2, "Setting is_command_palette_open to False..." )
+            # log( 1, "Setting is_command_palette_open to False..." )
 
             global is_command_palette_open
             is_command_palette_open = False
