@@ -33,7 +33,7 @@ class SetViewNewNameInputHandler(sublime_plugin.TextInputHandler):
         pass
 
     def initial_text(self):
-        return self.view.settings().get( 'last_input', 'New Name' )
+        return "%s %s" % ( self.view.settings().get( 'last_input', 'New Name' ), self.view.name() )
 
     def preview(self, text):
         pass
