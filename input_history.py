@@ -3,6 +3,7 @@ import sublime
 import sublime_plugin
 
 import os
+from collections import OrderedDict
 
 from debug_tools import getLogger
 from debug_tools.utilities import pop_dict_last_item
@@ -18,7 +19,7 @@ CURRENT_PACKAGE_NAME   = os.path.basename( PACKAGE_ROOT_DIRECTORY )
 g_settings = \
 {
     "last_input": "",
-    "workspaces": {}
+    "workspaces": OrderedDict()
 }
 
 MAXIMUM_WORSPACES_ENTRIES = 100
@@ -44,6 +45,8 @@ def load_settings():
     except:
         log.exception( "Could not load the settings file" )
         write_data_file( g_package_settings_path, g_settings, debug=0 )
+
+    g_settings['workspaces'] = OrderedDict( g_settings.get( 'workspaces', {} ) )
 
 
 def save_settings(widget_text):
